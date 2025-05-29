@@ -1,10 +1,9 @@
 "use client";
 
 import type React from "react";
-
 import { useEffect, useState } from "react";
 import dados, { TarefaInterface } from "@/data";
-import Cabecalho from "@/componentes/Cabecalhot";
+import Cabecalho from "@/componentes/Cabecalho";
 
 interface TarefaProps {
 	titulo: string;
@@ -41,6 +40,55 @@ interface TareafasProps {
 	dados: TarefaInterface[];
 }
 
+interface ModalTarefaProps {
+	adicionarTarefa: (titulo: string) => void;
+	fecharModal: () => void;
+}
+
+const ModalTarefa: React.FC<ModalTarefaProps> = ({
+	adicionarTarefa,
+	fecharModal,
+}) => {
+	const [titulo, setTitulo] = useState("");
+
+	const handleAdicionar = () => {
+		if (titulo.trim()) {
+			adicionarTarefa(titulo);
+			setTitulo("");
+			fecharModal();
+		}
+	};
+
+	return (
+		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+			<div className="bg-white p-6 rounded shadow-md w-full max-w-md">
+				<h2 className="text-xl font-semibold mb-4">Adicionar Tarefa</h2>
+				<input
+					type="text"
+					value={titulo}
+					onChange={(e) => setTitulo(e.target.value)}
+					placeholder="Digite a tarefa"
+					className="w-full px-3 py-2 border rounded mb-4"
+				/>
+				<div className="flex justify-end space-x-2">
+					<button
+						onClick={handleAdicionar}
+						className="bg-green-500 text-white px-4 py-2 rounded"
+					>
+						Adicionar
+					</button>
+					<button
+						onClick={fecharModal}
+						className="bg-gray-400 text-white px-4 py-2 rounded"
+					>
+						Cancelar
+					</button>
+				</div>
+			</div>
+		</div>
+	);
+};
+
 const Tarefas: React.FC<TareafasProps> = ({ dados }) => {
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -56,12 +104,36 @@ const Tarefas: React.FC<TareafasProps> = ({ dados }) => {
 };
 
 const Home = () => {
-	const tarefas: TarefaInterface[] = dados;
+	const [tarefas, setTarefas] = useState<TarefaInterface[]>(dados);
+	const [mostrarModal, setMostrarModal] = useState(false);
+
+	const adicionarTarefa = (titulo: string) => {
+		const novaTarefa: TarefaInterface = {
+			id: tarefas.length + 1,
+			title: titulo,
+			completed: false,
+		};
+		setTarefas((prev) => [...prev, novaTarefa]);
+	};
 
 	return (
 		<div className="container mx-auto p-4">
 			<Cabecalho />
+			<button
+				onClick={() => setMostrarModal(true)}
+				className="mb-4 px-4 py-2 bg-blue-500 text-white rounded"
+			>
+				Nova Tarefa
+			</button>
+
 			<Tarefas dados={tarefas} />
+
+			{mostrarModal && (
+				<ModalTarefa
+					adicionarTarefa={adicionarTarefa}
+					fecharModal={() => setMostrarModal(false)}
+				/>
+			)}
 		</div>
 	);
 };
